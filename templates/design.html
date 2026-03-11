@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Design - Weather ML</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0c0c0e; color: #eee; line-height: 1.6; padding: 40px; margin: 0; }
+        .container { max-width: 900px; margin: auto; background: #16161a; padding: 40px; border-radius: 15px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .back-link { display: inline-block; margin-bottom: 20px; color: #00d4ff; text-decoration: none; font-weight: bold; transition: 0.3s; }
+        .back-link:hover { color: #00ff88; transform: translateX(-5px); }
+        h1 { color: #00d4ff; font-size: 2.2em; margin-bottom: 5px; }
+        .subtitle { color: #888; font-size: 1.1em; margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
+        h2 { color: #00ff88; margin-top: 40px; border-left: 4px solid #00ff88; padding-left: 15px; }
+        h3 { color: #ffcc00; margin-top: 20px; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 10px; }
+        .pill { background: #333; padding: 2px 8px; border-radius: 4px; font-family: 'Courier New', monospace; color: #00d4ff; font-size: 0.9em; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1a1a1f; }
+        th, td { padding: 12px; text-align: left; border: 1px solid #333; }
+        th { background: #25252b; color: #00d4ff; }
+        
+        .callout1 { background: #1e1e24; border: 1px dashed #00ff88; padding: 20px; border-radius: 10px; margin-top: 40px; }
+        .callout1 strong { color: #00ff88; display: block; margin-bottom: 10px; font-size: 1.1em; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="/" class="back-link">← Back to Live Forecast</a>
+    
+    <h1>🛰️ AI-Powered Meteorological Prediction Engine</h1>
+    <div class="subtitle">Localized Machine Learning Forecasting Station for Metuchen, NJ</div>
+
+    
+
+    <h2>1. The High-Level Architecture</h2>
+    <p>The program is built on a <strong>Three-Tier Architecture</strong> that ensures the system remains autonomous and self-correcting:</p>
+    <ul>
+        <li><strong>Data Tier (Ingestion):</strong> Connects to Open-Meteo API using <span class="pill">requests-cache</span>. It fetches both 3 years of Historical "Truth" and a 10-day "Future" forecast.</li>
+        <li><strong>Logic Tier (Intelligence):</strong> Utilizes a dual-model approach:
+            <ul>
+                <li><strong>Random Forest Regressor:</strong> Predicts the intensity of precipitation.</li>
+                <li><strong>Logistic Regression:</strong> Predicts the probability of rain/snow events.</li>
+            </ul>
+        </li>
+        <li><strong>Presentation Tier (UI):</strong> A Flask-based web server that renders dynamic Matplotlib charts and customizes units for the end-user.</li>
+    </ul>
+
+    <h2>2. The Data Flow & Logic Engine</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Stage</th>
+                <th>Process</th>
+                <th>Technology</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Training</strong></td>
+                <td>Learns local patterns (Temp, Humidity, Pressure) from 2023–2025.</td>
+                <td><span class="pill">scikit-learn</span></td>
+            </tr>
+            <tr>
+                <td><strong>Inference</strong></td>
+                <td>Applies learned patterns to the 240-hour forecast window.</td>
+                <td><span class="pill">Random Forest</span></td>
+            </tr>
+            <tr>
+                <td><strong>Transformation</strong></td>
+                <td>Calculates Snow Ratio (10:1) and converts Metric to Customary units.</td>
+                <td><span class="pill">Pandas / NumPy</span></td>
+            </tr>
+            <tr>
+                <td><strong>Validation</strong></td>
+                <td>Logs "Predicted vs. Actual" to SQLite for error tracking.</td>
+                <td><span class="pill">SQLite3</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    
+
+    <h2>3. Key Design Features (The "Why")</h2>
+    <ul>
+        <li><strong>Lag Features:</strong> The model uses "Weather Memory"—it looks at the conditions from one hour ago to understand the trajectory of a storm, not just a single snapshot.</li>
+        <li><strong>Snow-Switch Logic:</strong> A software "gate" monitors temperature; at <strong>< 33.8°F</strong>, it triggers the snow accumulation algorithm.</li>
+        <li><strong>Self-Correction:</strong> By calculating the Mean Absolute Error (MAE), the system provides a transparency score, telling the user exactly how much to trust the model today.</li>
+    </ul>
+
+    <h2>4. Technical Stack Summary</h2>
+    <ul>
+        <li><strong>Languages:</strong> Python 3.11</li>
+        <li><strong>Database:</strong> SQLite3</li>
+        <li><strong>Deployment:</strong> Debian Linux virtual machine</li>
+        <li><strong>Web Application Framework:</strong> Flask</li>
+    </ul>
+
+    <div class="callout1">
+        <strong>💡 Feedback Loop</strong>
+        The program doesn't just "guess" and forget; it writes its guess to a database and checks back later to see if it was right. This process of continuous monitoring and logging is the essence of Machine Learning Operations (MLOps).
+    </div>
+</div>
+
+</body>
+</html>

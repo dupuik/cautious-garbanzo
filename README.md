@@ -1,2 +1,2 @@
 # cautious-garbanzo
-Weather Machine Learning Forecasting
+Weather Machine Learning Model
